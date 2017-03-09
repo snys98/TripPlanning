@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using TripPlanning.Gis.DataStructs;
 
-namespace TripPlanning.Lib.Entities
+namespace TripPlanning.Data.Entities
 {
     public class Route:IPath
     {
