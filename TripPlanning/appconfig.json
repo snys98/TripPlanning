@@ -1,3 +1,5 @@
 {
-  "section1": "hehe"
+  "ConnectionStrings": {
+    "TripPlanningDatabase": "Server=(localdb)\\mssqllocaldb;Database=TripPlanning;Trusted_Connection=True;"
+  }
 }

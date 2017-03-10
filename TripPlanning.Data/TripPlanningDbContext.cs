@@ -6,7 +6,7 @@ using TripPlanning.Data.Entities;
 
 namespace TripPlanning.Data
 {
-    class TripPlanningDbContext:DbContext
+    public class TripPlanningDbContext:DbContext
     {
         public DbSet<Airport> Airports { get; set; }
         public DbSet<TrainStation> TrainStations { get; set; }
