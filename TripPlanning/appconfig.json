@@ -1,5 +1,13 @@
 {
   "ConnectionStrings": {
     "TripPlanningDatabase": "Server=(localdb)\\mssqllocaldb;Database=TripPlanning;Trusted_Connection=True;"
+  },
+  "Logging": {
+    "IncludeScopes": false,
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    }
   }
 }

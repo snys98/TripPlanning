@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TripPlanning.Gis.DataStructs;
+using TripPlanning.GisAnalysis.DataStructs;
 
 namespace TripPlanning.Data.Entities
 {
-    public class TrainSegment:IEdge
+    public class TrainSegment
     {
+        [Key]
+        public int Id { get; set; }
         public double Weight { get; set; }
-        public INode Start { get; set; }
-        public INode End { get; set; }
+        [ForeignKey(nameof(DeptStationName))]
+        public TrainStation DeptStation { get; set; }
+        public string DeptStationName { get; set; }
+        [ForeignKey(nameof(DestStationName))]
+        public TrainStation DestStation { get; set; }
+        public string DestStationName { get; set; }
     }
 }

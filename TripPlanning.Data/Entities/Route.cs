@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
-using TripPlanning.Gis.DataStructs;
+using System.ComponentModel.DataAnnotations;
+using TripPlanning.GisAnalysis.DataStructs;
 
 namespace TripPlanning.Data.Entities
 {
-    public class Route:IPath
+    public class Route
     {
-        public INode StartNode { get; set; }
-        public INode EndNode { get; set; }
-        public List<INode> Nodes { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public City StartCity { get; set; }
+        public City EndCity { get; set; }
+        public List<City> TransitCities { get; set; }
         public double TotalWeight { get; set; }
     }
 }

@@ -1,8 +1,15 @@
-﻿namespace TripPlanning.Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
+namespace TripPlanning.Data.Entities
 {
-    public class Airport:IStation
+    public class Airport
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        [Key]
+        public string AirportName { get; set; }
+        public string CityCode { get; set; }
+        [ForeignKey(nameof(CityCode))]
+        public City City { get; set; }
     }
 }
