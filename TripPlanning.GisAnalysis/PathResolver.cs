@@ -6,7 +6,7 @@ using TripPlanning.GisAnalysis.DataStructs;
 
 namespace TripPlanning.GisAnalysis
 {
-    public class PathResolver
+    public class PathResolver:IPathResolver
     {
         public Node StartNode { get; private set; }
         public List<Node> Nodes { get; set; } = new List<Node>();//结点的集合
@@ -23,30 +23,24 @@ namespace TripPlanning.GisAnalysis
         List<Path> _paths = new List<Path>();
 
         /// <summary>
-        /// 结点+边+起点+图类型,构造最短路径模拟器
+        /// 结点+边+起点,构造最短路径模拟器
         /// </summary>
         /// <param name="nodes"></param>
         /// <param name="edges"></param>
         /// <param name="startNode"></param>
-        public PathResolver(IEnumerable<Node> nodes, IEnumerable<Edge> edges, Node startNode)
+        public PathResolver(List<Node> nodes, List<Edge> edges, Node startNode)
         {
-            Nodes = nodes.ToList();
-            Edges = edges as List<Edge>;
+            Nodes = nodes;
+            Edges = edges;
             foreach (var node in nodes)
             {
                 AdjacentEdgesDictionary[node] = Edges?.FindAll((x) => x.Start == node);
             }
 
-            SetStartINode(startNode);
+            SetStartNode(startNode);
         }
 
-        public PathResolver(List<Edge> setedIEdges)
-            : this(setedIEdges.SelectMany(item => new List<Node> { item.Start, item.End }).Distinct(), setedIEdges, setedIEdges[0].Start)
-        {
-
-        }
-
-        private void SetStartINode(Node startNode)
+        private void SetStartNode(Node startNode)
         {
             if (AdjacentEdgesDictionary[startNode] == null || AdjacentEdgesDictionary[startNode].Count == 0)
             {
@@ -60,10 +54,10 @@ namespace TripPlanning.GisAnalysis
         /// 生成起点至终点的最短路径,关键代码段
         /// </summary>
         /// <returns>路径点集,最短距离</returns>
-        public void FormShortestPath<T>() where T:Path ,new()
+        public void FormShortestPath()
         {
             //初始化路径表,将起点加入路径
-            _paths.Add(new T()
+            _paths.Add(new Path()
             {
                 Nodes = new List<Node>() { StartNode },
                 TotalWeight = 0
@@ -80,7 +74,7 @@ namespace TripPlanning.GisAnalysis
 
                     foreach (Edge edge in AdjacentEdgesDictionary[node])//三级嵌套,遍历结点所有有向边
                     {
-                        Path newIPath = new T() { Nodes = new List<Node>() };
+                        Path newIPath = new Path() { Nodes = new List<Node>() };
                         newIPath.Nodes.AddRange(_paths[i].Nodes);//初始化临时路径
                         newIPath.TotalWeight = _paths[i].TotalWeight + edge.Weight;//临时路径总权重=当前路径权重+即将连接的边的权重
                         newIPath.Nodes.Add(edge.End);//将连接的结点加入路径中
@@ -118,9 +112,9 @@ namespace TripPlanning.GisAnalysis
             return minWeight;
         }
 
-        public List<Path> GetShortestPath(Node INode)
+        public List<Path> GetShortestPaths(Node endNode, double maxWeight)
         {
-            List<Path> validPaths = _paths.FindAll((x) => x.EndNode == INode);
+            List<Path> validPaths = _paths.FindAll((x) => x.EndNode == endNode);
 
             double minWeight = double.MaxValue;
             foreach (var item in validPaths)
@@ -131,7 +125,7 @@ namespace TripPlanning.GisAnalysis
                 }
             }
 
-            return validPaths.Where(path => Math.Abs(path.TotalWeight - minWeight) < 10 * Double.MinValue).ToList();
+            return validPaths.Where(path => Math.Abs(path.TotalWeight - minWeight) < GeoAnalysisConfig.Tolerance).ToList();
         }
     }
 }

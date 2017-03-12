@@ -9,5 +9,10 @@
       "System": "Information",
       "Microsoft": "Information"
     }
+  },
+  "GeoAnalysis": {
+    "Tolerance": 0.000000001,
+    "FlightPreferDist": 5,
+    "MaxTransit": 2 
   }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using TripPlanning.Data;
 using TripPlanning.Data.Entities;
+using TripPlanning.GisAnalysis;
+using TripPlanning.GisAnalysis.Extensions;
 
 namespace TripPlanning
 {
@@ -70,79 +72,10 @@ namespace TripPlanning
                     
                     Console.ReadKey();
                     break;
+                case "":
+                    var resolver = ServiceProvider.GetRequiredService<IPathResolver>();
+                    break;
             }
-            //#region InitAirport
-
-            //StreamReader airportReader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "airport.txt"));
-            //Task.Run(() =>
-            //{
-            //    while (!stationReader.EndOfStream)
-            //    {
-            //        //南苑机场,116.397174,39.791233
-            //        var str = stationReader.ReadLine();
-            //        var item = str.Split(':', ',');
-            //        var entry = new Airport()
-            //        {
-            //            AirportName = item[0],
-            //            CityCode = item[1],
-            //            X = double.Parse(item[2]),
-            //            Y = double.Parse(item[3])
-            //        };
-            //        dbcontext.Airports.Add(entry);
-            //    }
-            //    dbcontext.SaveChanges();
-            //});
-
-            //#endregion
-
-            //#region InitTrains
-
-            //StreamReader trainReader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "trainPrice.txt"));
-            //Task.Run(() =>
-            //{
-            //    while (!stationReader.EndOfStream)
-            //    {
-            //        //北京北: 北京: 116.353817,39.942789
-            //        var str = stationReader.ReadLine();
-            //        var item = str.Split(':', ',');
-            //        var entry = new TrainSegment()
-            //        {
-            //            StationName = item[0],
-            //            CityCode = item[1],
-            //            X = double.Parse(item[2]),
-            //            Y = double.Parse(item[3])
-            //        };
-            //        dbcontext.TrainStations.Add(entry);
-            //    }
-            //    dbcontext.SaveChanges();
-            //});
-
-            //#endregion
-
-            //#region InitFlights
-
-            //StreamReader flightReader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "trainPrice.txt"));
-            //Task.Run(() =>
-            //{
-            //    while (!stationReader.EndOfStream)
-            //    {
-            //        //北京北: 北京: 116.353817,39.942789
-            //        var str = stationReader.ReadLine();
-            //        var item = str.Split(':', ',');
-            //        var entry = new TrainStation()
-            //        {
-            //            StationName = item[0],
-            //            CityCode = item[1],
-            //            X = double.Parse(item[2]),
-            //            Y = double.Parse(item[3])
-            //        };
-            //        dbcontext.TrainStations.Add(entry);
-            //    }
-            //    dbcontext.SaveChanges();
-            //});
-
-            //#endregion
-            
             Console.ReadKey();
         }
 
@@ -274,18 +207,10 @@ namespace TripPlanning
                 options.UseMemoryCache(new MemoryCache(new MemoryCacheOptions() {ExpirationScanFrequency = TimeSpan.FromMinutes(30)}));
             });
 
-            // Add framework services.
-
             services.AddLogging();
 
-            // #region account related services
+            services.AddPathResolver(Configuration.GetSection("GeoAnalysis"));
 
-            // services.AddSingleton<IEmailSender>(AuthMessageSender.Instance)
-            //     .AddSingleton<ISmsSender>(AuthMessageSender.Instance);
-
-            // #endregion
-
-            //services.AddViewModels();
             return services;
         }
     }

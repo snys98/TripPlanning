@@ -23,9 +23,6 @@ namespace TripPlanning.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<City>().HasBaseType<Node>();
-            //modelBuilder.Entity<FlightSegment>().HasOne(x => );
-            //modelBuilder.Entity<FlightSegment>().HasOne(x => (City) x.End);
             base.OnModelCreating(modelBuilder);
         }
 
