@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TripPlanning.Data.Entities
 {
-    public class TrainStation
+    public class TrainStation:IStation
     {
         [Key]
         public string StationName { get; set; }

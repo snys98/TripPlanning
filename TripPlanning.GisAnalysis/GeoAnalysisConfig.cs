@@ -19,21 +19,21 @@ namespace TripPlanning.GisAnalysis
         /// <summary>
         /// 偏好飞机的行程阈值,单位为经纬度,1°约100km
         /// </summary>
-        public static double FlightPreferDist { get; set; }
+        public static double FlightPreferDist { get; private set; } = 8;
 
         /// <summary>
         /// 城市间距的容差
         /// </summary>
-        public static double Tolerance { get; set; }
+        public static double Tolerance { get; private set; } = 1E-10;
 
         /// <summary>
         /// 同城换乘权重
         /// </summary>
-        public static double TransitWeigth { get; set; }
+        public static double TransitWeigth { get; private set; }
 
         /// <summary>
         /// 允许最大换乘次数
         /// </summary>
-        public static int MaxTransit { get; set; }
+        public static int MaxTransit { get; private set; }
     }
 }
