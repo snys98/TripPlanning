@@ -81,7 +81,6 @@ namespace TripPlanning.GisAnalysis
                         if (newIPath.TotalWeight < GetMinWeight(edge.End))//保留短于当前最短路径的路径
                         {
                             _paths.Add(newIPath);
-
                         }
                     }
                     CoveredNodes.Add(node);//设置该点状态为已经遍历

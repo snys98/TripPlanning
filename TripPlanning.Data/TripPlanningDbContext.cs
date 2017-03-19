@@ -9,7 +9,7 @@ namespace TripPlanning.Data
 {
     public class TripPlanningDbContext:DbContext
     {
-        public DbSet<Airport> Airports { get; set; }
+        public DbSet<AirStation> Airports { get; set; }
         public DbSet<TrainStation> TrainStations { get; set; }
         public DbSet<FlightSegment> FlightSegments { get; set; }
         public DbSet<TrainSegment> TrainSegments { get; set; }

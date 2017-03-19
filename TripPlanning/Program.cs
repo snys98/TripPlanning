@@ -48,15 +48,17 @@ namespace TripPlanning
             {
                 case "i":
                     Task[] tasks = {};
-                    
-
                     if (DbContext.Database.EnsureCreated())
                     {
-                        tasks[0] = new Task(InitCityData);
-                        tasks[1] = new Task(InitAirportData);
-                        tasks[2] = new Task(InitTraiStationData);
-                        tasks[3] = new Task(InitFlightSegmentData);
-                        tasks[4] = new Task(InitCitySegmentData);
+                        tasks[0] = new Task(InitCityAndTrainStationData).ContinueWith((x)=> {
+                            InitTrainSegmentData();
+                        });
+                        tasks[0].Start();
+                        tasks[1] = new Task(InitAirportData).ContinueWith((x) =>
+                        {
+                            InitFlightSegmentData();
+                        });
+                        tasks[1].Start();
                     }
                     Debug.WriteLine("wait task to be finished");
                     while (tasks.Any(x=>!x.IsCompleted))
@@ -79,7 +81,7 @@ namespace TripPlanning
             Console.ReadKey();
         }
 
-        private static void InitCitySegmentData()
+        private static void InitCityAndTrainStationData()
         {
             using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "station.txt")))
             {
@@ -87,118 +89,147 @@ namespace TripPlanning
                 {
                     //北京北: 北京: 116.353817,39.942789
                     var line = reader.ReadLine();
-                    List<string> splitLine = line.Split(':', ' ', ',').Skip(1).ToList();
-                    if (splitLine.Count == 3)
-                    {
-                        var entry = new City()
-                        {
-                            CityName = splitLine[0],
-                            X = double.Parse(splitLine[1]),
-                            Y = double.Parse(splitLine[2])
-                        };
-                        DbContext.Cities.Add(entry);
-                    }
-                }
-                DbContext.SaveChanges();
-            }
-        }
-
-        private static void InitFlightSegmentData()
-        {
-            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "station.txt")))
-            {
-                while (!reader.EndOfStream)
-                {
-                    //北京北: 北京: 116.353817,39.942789
-                    var line = reader.ReadLine();
-                    List<string> splitLine = line.Split(':', ' ', ',').ToList();
+                    List<string> splitLine = line.Split(new char[] { ':', ' ', ',' },StringSplitOptions.RemoveEmptyEntries).ToList();
                     if (splitLine.Count == 4)
                     {
-                        var entry = new City()
+                        var city = new City()
                         {
                             CityName = splitLine[1],
+                        };
+                        DbContext.Cities.Add(city);
+                        var station = new TrainStation()
+                        {
+                            CityName = splitLine[1],
+                            StationName = splitLine[0],
                             X = double.Parse(splitLine[2]),
                             Y = double.Parse(splitLine[3])
                         };
-                        DbContext.Cities.Add(entry);
+                        DbContext.TrainStations.Add(station);
                     }
                 }
                 DbContext.SaveChanges();
             }
         }
-
-        private static void InitTraiStationData()
+        private static void InitAirportData()
         {
+            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "flight.txt")))
+            {
+                HashSet<string> coveredAirports = new HashSet<string>();
+                while (!reader.EndOfStream)
+                {
+                    //KN5987,南苑机场,浦东国际机场,21:55,00:15,370,北京,上海
+                    var line = reader.ReadLine();
+                    List<string> splitLine = line.Split(' ', ',').ToList();
+                    if (splitLine.Count == 8)
+                    {
+                        if (coveredAirports.Add(splitLine[1]))
+                        {
+                            var entry = new AirStation()
+                            {
+                                CityName = splitLine[6],
+                                StationName = splitLine[1],
+                            };
+                            DbContext.Airports.Add(entry);
+                        }
+                        if (coveredAirports.Add(splitLine[2]))
+                        {
+                            var entry = new AirStation()
+                            {
+                                CityName = splitLine[7],
+                                StationName = splitLine[2],
+                            };
+                            DbContext.Airports.Add(entry);
+                        }
+
+                    }
+                }
+                DbContext.SaveChanges();
+            }
             using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "airport.txt")))
             {
                 while (!reader.EndOfStream)
                 {
                     //南苑机场,116.397174,39.791233
                     var line = reader.ReadLine();
-                    List<string> splitLine = line.Split(':', ' ', ',').Skip(1).ToList();
-                    if (splitLine.Count == 3)
+                    List<string> splitLine = line.Split(':', ' ', ',').ToList();
+                    if (splitLine.Count == 4)
                     {
-                        var entry = new TrainStation()
+                        var airport = DbContext.Airports.First(x => x.StationName == splitLine[0]);
+                        airport.X = double.Parse(splitLine[1]);
+                        airport.Y = double.Parse(splitLine[2]);
+                    }
+                }
+                DbContext.SaveChanges();
+            }
+        }
+        private static void InitFlightSegmentData()
+        {
+            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "flight.txt")))
+            {
+                var airports = DbContext.Airports.Select(x=>x.StationName).ToList();
+                while (!reader.EndOfStream)
+                {
+                    //KN5987,南苑机场,浦东国际机场,21:55,00:15,370,北京,上海
+                    var line = reader.ReadLine();
+                    List<string> splitLine = line.Split(' ', ',').ToList();
+                    if (splitLine.Count == 8)
+                    {
+                        if (airports.Contains(splitLine[1]) && airports.Contains(splitLine[2]))
                         {
-                            CityCode = splitLine[1],
-                            StationName = splitLine[0],
-                        };
-                        DbContext.TrainStations.Add(entry);
+                            int timeCost = CaculateTimeCost(splitLine[3], splitLine[4]);
+                            var entry = new FlightSegment() {
+                                DeptAirportName = splitLine[1],
+                                DeptTime = splitLine[3],
+                                DestAirportName = splitLine[2],
+                                FlightNumber = splitLine[0],
+                                Price = int.Parse(splitLine[5]),
+                                TimeCost = timeCost,
+                                ArriTime = splitLine[4],
+                                PlusDays = (int.Parse(splitLine[3]) + timeCost) % 2400
+                            };
+                            DbContext.FlightSegments.Add(entry);
+                        }
                     }
                 }
                 DbContext.SaveChanges();
             }
         }
 
-        private static void InitAirportData()
+        private static void InitTrainSegmentData()
         {
-            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "station.txt")))
+            var stations = DbContext.TrainStations.Select(x=>x.StationName).ToList();
+            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "train.txt")))
             {
                 while (!reader.EndOfStream)
                 {
-                    //北京北: 北京: 116.353817,39.942789
+                    //T3017	240	锦州	5	12:17	12:23	6
                     var line = reader.ReadLine();
-                    List<string> splitLine = line.Split(':', ' ', ',').Skip(1).ToList();
-                    if (splitLine.Count == 3)
+                    List<string> splitLine = line.Split(' ', '\t', ',').ToList();
+                    if (!stations.Contains(splitLine[2]))
                     {
-                        var entry = new City()
+                        continue;
+                    }
+                    if (splitLine.Count == 7)
+                    {
+                        int timeCost = CaculateTimeCost(splitLine[3], splitLine[4]);
+                        var entry = new FlightSegment()
                         {
-                            CityName = splitLine[0],
-                            X = double.Parse(splitLine[1]),
-                            Y = double.Parse(splitLine[2])
+                            DeptAirportName = splitLine[1],
+                            DeptTime = splitLine[3],
+                            DestAirportName = splitLine[2],
+                            FlightNumber = splitLine[0],
+                            Price = int.Parse(splitLine[5]),
+                            TimeCost = timeCost,
+                            ArriTime = splitLine[4],
+                            PlusDays = (int.Parse(splitLine[3]) + timeCost) % 2400
                         };
-                        DbContext.Cities.Add(entry);
+                        DbContext.FlightSegments.Add(entry);
                     }
                 }
                 DbContext.SaveChanges();
             }
         }
-
-        private static void InitCityData()
-        {
-            using (StreamReader reader = File.OpenText(Path.Combine(AppContext.BaseDirectory, "Data", "station.txt")))
-            {
-                while (!reader.EndOfStream)
-                {
-                    //北京北: 北京: 116.353817,39.942789
-                    var line = reader.ReadLine();
-                    List<string> splitLine = line.Split(':', ' ', ',').Skip(1).ToList();
-                    if (splitLine.Count == 3)
-                    {
-                        var entry = new City()
-                        {
-                            CityName = splitLine[0],
-                            X = double.Parse(splitLine[1]),
-                            Y = double.Parse(splitLine[2])
-                        };
-                        DbContext.Cities.Add(entry);
-                    }
-                }
-                DbContext.SaveChanges();
-            }
-        }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public static IServiceCollection ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TripPlanningDbContext>(options =>
@@ -212,6 +243,11 @@ namespace TripPlanning
             services.AddPathResolver(Configuration.GetSection("GeoAnalysis"));
 
             return services;
+        }
+
+        private static int CaculateTimeCost(string v1, string v2)
+        {
+            return (int)(TimeSpan.Parse(v2) - TimeSpan.Parse(v1)).TotalMinutes;
         }
     }
 }

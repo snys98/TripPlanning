@@ -5,17 +5,14 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace TripPlanning.Data.Entities
 {
-    public class Airport:IStation
+    public class AirStation
     {
         [Key]
-        public string AirportName { get; set; }
-        public string CityCode { get; set; }
-        [ForeignKey(nameof(CityCode))]
+        public string StationName { get; set; }
+        public string CityName { get; set; }
+        [ForeignKey(nameof(CityName))]
         public City City { get; set; }
-
-        string IStation.StationName {
-            get => this.AirportName;
-            set => this.AirportName = value;
-        }
+        public double X { get ; set ; }
+        public double Y { get ; set ; }
     }
 }

@@ -13,7 +13,9 @@ namespace TripPlanning.Data.Entities
     {
         [Key]
         public int Id { get; set; }
-        public double Weight { get; set; }
+        public string TrainNumber { get; set; }
+        public int TimeCost { get; set; }
+        public int Price { get; set; }
         [ForeignKey(nameof(DeptStationName))]
         public TrainStation DeptStation { get; set; }
         public string DeptStationName { get; set; }

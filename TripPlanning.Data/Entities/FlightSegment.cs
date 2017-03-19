@@ -13,12 +13,17 @@ namespace TripPlanning.Data.Entities
     {
         [Key]
         public int Id { get; set; }
-        public double Weight { get; set; }
-        [ForeignKey(nameof(DeptAirportCode))]
-        public Airport DeptAirport { get; set; }
-        public string DeptAirportCode { get; set; }
-        [ForeignKey(nameof(DestAirportCode))]
-        public Airport DestAirport { get; set; }
-        public string DestAirportCode { get; set; }
+        public string FlightNumber { get; set; }
+        public int TimeCost { get; set; }
+        public int Price { get; set; }
+        [ForeignKey(nameof(DeptAirportName))]
+        public AirStation DeptAirport { get; set; }
+        public string DeptAirportName { get; set; }
+        [ForeignKey(nameof(DestAirportName))]
+        public AirStation DestAirport { get; set; }
+        public string DestAirportName { get; set; }
+        public string DeptTime { get; set; }
+        public string ArriTime { get; set; }
+        public int PlusDays { get; set; }
     }
 }
